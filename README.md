@@ -1,7 +1,7 @@
 # Hexogen Timesync
 
 [![Tests](https://github.com/hexogen/timesync/workflows/tests/badge.svg)](https://github.com/hexogen/timesync/actions)
-[![PHP Version](https://img.shields.io/badge/php-%5E8.5-blue.svg)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/php-%5E8.4-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A simple and elegant time synchronization library for PHP that allows you to synchronize your application's clock with a remote time source based on IP geolocation.
@@ -13,7 +13,7 @@ A simple and elegant time synchronization library for PHP that allows you to syn
 - ⚡ **Microsecond Precision** - Maintains microsecond-level time accuracy
 - 🔌 **PSR-18 HTTP Client** - Works with any PSR-18 compatible HTTP client
 - 🧪 **Fully Tested** - 49 tests with 142 assertions, 100% coverage
-- 🎯 **Modern PHP** - Requires PHP 8.5+, uses strict types and modern syntax
+- 🎯 **Modern PHP** - Requires PHP 8.4+, uses strict types and modern syntax
 - 📦 **Zero Dependencies** - Only PSR interfaces required
 
 ## Installation

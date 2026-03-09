@@ -47,6 +47,8 @@ jobs:
       - name: Run unit tests with coverage
         run: ./vendor/bin/phpunit tests/ --coverage-text --coverage-clover=coverage.xml
         if: matrix.php-version == '8.5'
+        env:
+          XDEBUG_MODE: coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
