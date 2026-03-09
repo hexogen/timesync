@@ -1,0 +1,76 @@
+{
+    "ip": "37.17.245.123",
+    "location": {
+        "continent_code": "EU",
+        "continent_name": "Europe",
+        "country_code2": "UA",
+        "country_code3": "UKR",
+        "country_name": "Ukraine",
+        "country_name_official": "Ukraine",
+        "country_capital": "Kyiv",
+        "state_prov": "Kiev",
+        "state_code": "UA-30",
+        "district": "Vyshhorods'kyi district",
+        "city": "Vyshhorod",
+        "zipcode": "07300",
+        "latitude": "50.58313",
+        "longitude": "30.48568",
+        "is_eu": false,
+        "country_flag": "https://ipgeolocation.io/static/flags/ua_64.png",
+        "geoname_id": "688723",
+        "country_emoji": "🇺🇦"
+    },
+    "country_metadata": {
+        "calling_code": "+380",
+        "tld": ".ua",
+        "languages": [
+            "uk",
+            "ru-UA",
+            "rom",
+            "pl",
+            "hu"
+        ]
+    },
+    "currency": {
+        "code": "UAH",
+        "name": "Hryvnia",
+        "symbol": "₴"
+    },
+    "asn": {
+        "as_number": "AS43361",
+        "organization": "LUMINA LLC",
+        "country": "UA"
+    },
+    "time_zone": {
+        "name": "Europe/Kyiv",
+        "offset": 2,
+        "offset_with_dst": 2,
+        "current_time": "2026-03-09 20:58:46.961+0200",
+        "current_time_unix": 1773082726.961,
+        "current_tz_abbreviation": "EET",
+        "current_tz_full_name": "Eastern European Standard Time",
+        "standard_tz_abbreviation": "EET",
+        "standard_tz_full_name": "Eastern European Standard Time",
+        "is_dst": false,
+        "dst_savings": 0,
+        "dst_exists": true,
+        "dst_tz_abbreviation": "EEST",
+        "dst_tz_full_name": "Eastern European Summer Time",
+        "dst_start": {
+            "utc_time": "2026-03-29 TIME 01:00",
+            "duration": "+1.00H",
+            "gap": true,
+            "date_time_after": "2026-03-29 TIME 04:00",
+            "date_time_before": "2026-03-29 TIME 03:00",
+            "overlap": false
+        },
+        "dst_end": {
+            "utc_time": "2026-10-25 TIME 01:00",
+            "duration": "-1.00H",
+            "gap": false,
+            "date_time_after": "2026-10-25 TIME 03:00",
+            "date_time_before": "2026-10-25 TIME 04:00",
+            "overlap": true
+        }
+    }
+}

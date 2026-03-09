@@ -1,0 +1,34 @@
+{
+    "version": "0.1.0",
+    "name": "hexogen/timesync",
+    "description": "A simple time synchronization library for PHP.",
+    "type": "library",
+    "require": {
+        "php": "^8.3",
+        "psr/clock": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-message": "^2.0",
+        "nyholm/psr7": "^1.8"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "guzzlehttp/guzzle": "^7.10",
+        "phpunit/phpunit": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hexogen\\Timesync\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Hexogen\\Timesync\\Tests\\": "tests/"
+        }
+    },
+    "license": "MIT",
+    "scripts": {
+        "test": "./vendor/bin/phpunit ./tests",
+        "lint": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "fix": "./vendor/bin/php-cs-fixer fix"
+    }
+}
