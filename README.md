@@ -14,7 +14,6 @@ A simple and elegant time synchronization library for PHP that allows you to syn
 - 🔌 **PSR-18 HTTP Client** - Works with any PSR-18 compatible HTTP client
 - 🧪 **Fully Tested** - 49 tests with 142 assertions, 100% coverage
 - 🎯 **Modern PHP** - Requires PHP 8.4+, uses strict types and modern syntax
-- 📦 **Zero Dependencies** - Only PSR interfaces required
 
 ## Installation
 
@@ -26,9 +25,8 @@ composer require hexogen/timesync
 
 ## Requirements
 
-- PHP 8.3 or higher
-- PSR-18 HTTP Client implementation (e.g., Guzzle)
-- PSR-17 HTTP Message Factory implementation (e.g., Nyholm PSR-7)
+- PHP 8.4 or higher
+- A PSR-18 compatible HTTP client (e.g., Guzzle, Symfony HttpClient)
 
 ## Quick Start
 
