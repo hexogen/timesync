@@ -333,6 +333,12 @@ This library is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Changelog
 
+### 0.1.1 (2026-03-10)
+
+- Added MIT `LICENSE` file
+- Improved workflow reliability for coverage reporting
+- README fixes and consistency improvements
+
 ### 0.1.0 (2026-03-09)
 
 - Initial release
