@@ -1,5 +1,6 @@
 # Hexogen Timesync
 
+[![Package Version](https://img.shields.io/packagist/v/hexogen/timesync.svg)](https://packagist.org/packages/hexogen/timesync)
 [![Tests](https://github.com/hexogen/timesync/workflows/tests/badge.svg)](https://github.com/hexogen/timesync/actions)
 [![Code Coverage](https://codecov.io/gh/hexogen/timesync/branch/main/graph/badge.svg)](https://codecov.io/gh/hexogen/timesync)
 [![PHP Version](https://img.shields.io/badge/php-8.3%2B-blue.svg)](https://www.php.net/releases/8.3/)
