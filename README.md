@@ -1,4 +1,4 @@
-# Hexogen Timesync
+# Timesync
 
 [![Package Version](https://img.shields.io/packagist/v/hexogen/timesync.svg)](https://packagist.org/packages/hexogen/timesync)
 [![Tests](https://github.com/hexogen/timesync/workflows/tests/badge.svg)](https://github.com/hexogen/timesync/actions)
