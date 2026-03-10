@@ -39,7 +39,7 @@ class Clock implements ClockInterface
         $seconds = (int) floor($currentTimestamp);
         $microseconds = (int) round(($currentTimestamp - $seconds) * 1_000_000);
 
-        $dateTime = new DateTimeImmutable()->setTimestamp($seconds)->modify("+{$microseconds} microseconds");
+        $dateTime = (new DateTimeImmutable())->setTimestamp($seconds)->modify("+{$microseconds} microseconds");
 
         return $dateTime->setTimezone(new DateTimeZone($this->timeZone));
     }

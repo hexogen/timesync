@@ -1,7 +1,8 @@
 # Hexogen Timesync
 
 [![Tests](https://github.com/hexogen/timesync/workflows/tests/badge.svg)](https://github.com/hexogen/timesync/actions)
-[![PHP Version](https://img.shields.io/badge/php-%5E8.4-blue.svg)](https://php.net)
+[![Code Coverage](https://codecov.io/gh/hexogen/timesync/branch/main/graph/badge.svg)](https://codecov.io/gh/hexogen/timesync)
+[![PHP Version](https://img.shields.io/badge/php-8.3%2B-blue.svg)](https://www.php.net/releases/8.3/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A simple and elegant time synchronization library for PHP that allows you to synchronize your application's clock with a remote time source based on IP geolocation.
@@ -256,7 +257,6 @@ try {
 
 ## Performance
 
-- **Microsecond precision**: Maintains accuracy down to microseconds
 - **Delta calculation**: Only calculates time offset once per clock instance
 - **Lightweight**: Minimal overhead, no background processes
 - **Caching**: Use dependency injection to cache clock instances
