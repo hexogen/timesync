@@ -1,5 +1,4 @@
 {
-    "version": "0.1.2",
     "name": "hexogen/timesync",
     "description": "A simple time synchronization library for PHP.",
     "type": "library",
