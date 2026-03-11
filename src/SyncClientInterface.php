@@ -8,5 +8,5 @@ use Psr\Clock\ClockInterface;
 
 interface SyncClientInterface
 {
-    public function getCurrentTime(?string $ip = null): ClockInterface;
+    public function getCurrentTime(string $ip): ClockInterface;
 }

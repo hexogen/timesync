@@ -10,12 +10,13 @@ A simple and elegant time synchronization library for PHP that allows you to syn
 
 ## Features
 
-- 🕐 **PSR-20 Clock Interface** - Fully compliant with PSR-20 Clock standard
-- 🌍 **IP Geolocation** - Automatic time synchronization based on IP address
+- 🕐 **PSR-20 Clock Interface** - Fully compliant with the PSR-20 Clock standard
+- 🌍 **IP Geolocation** - Fetch time data for an IPv4 address via ipgeolocation.io
+- 🔍 **Server IP Detection** - Automatically detect the current server IP via `SyncService`
 - ⚡ **Microsecond Precision** - Maintains microsecond-level time accuracy
 - 🔌 **PSR-18 HTTP Client** - Works with any PSR-18 compatible HTTP client
-- 🧪 **Fully Tested** - 49 tests with 142 assertions, 100% coverage
-- 🎯 **Modern PHP** - Requires PHP 8.4+, uses strict types and modern syntax
+- 🧪 **Fully Tested** - Covered by PHPUnit tests
+- 🎯 **Modern PHP** - Requires PHP 8.4+
 
 ## Installation
 
@@ -28,36 +29,52 @@ composer require hexogen/timesync
 ## Requirements
 
 - PHP 8.4 or higher
-- A PSR-18 compatible HTTP client (e.g., Guzzle, Symfony HttpClient)
+- A PSR-18 compatible HTTP client (for example Guzzle or Symfony HttpClient)
+
+## Upgrade Guide for 0.2.0
+
+Version `0.2.0` contains a breaking API change:
+
+- `IPGeolocationClient` is now a low-level client for explicit IPv4 lookups only
+- `IPGeolocationClient::__construct()` no longer accepts a `ServerIPDetectorInterface`
+- `IPGeolocationClient::getCurrentTime()` now requires `string $ip`
+- Automatic server IP detection moved to `SyncService`
+
+### Before (`0.1.x`)
+
+```php
+$client = new IPGeolocationClient($apiKey, $httpClient, $ipDetector);
+$clock = $client->getCurrentTime();
+```
+
+### After (`0.2.0`)
+
+```php
+$syncClient = new IPGeolocationClient($apiKey, $httpClient);
+$syncService = new SyncService($syncClient, $ipDetector);
+$clock = $syncService->getCurrentTime();
+```
 
 ## Quick Start
 
 ```php
 <?php
 
+use GuzzleHttp\Client;
 use Hexogen\Timesync\IPGeolocationClient;
 use Hexogen\Timesync\IpifyIPDetector;
-use GuzzleHttp\Client;
+use Hexogen\Timesync\SyncService;
 
-// Create HTTP client
 $httpClient = new Client();
-
-// Create IP detector
 $ipDetector = new IpifyIPDetector($httpClient);
-
-// Create time sync client with your API key
-$client = new IPGeolocationClient(
+$syncClient = new IPGeolocationClient(
     apiKey: 'your-ipgeolocation-api-key',
     httpClient: $httpClient,
-    ipDetector: $ipDetector
 );
+$syncService = new SyncService($syncClient, $ipDetector);
 
-// Get synchronized clock for a specific IP
-$clock = $client->getCurrentTime('8.8.8.8');
-
-// Get current synchronized time
-$now = $clock->now();
-echo $now->format('Y-m-d H:i:s.u'); // 2026-03-09 18:30:17.419000
+$clock = $syncService->getCurrentTime();
+echo $clock->now()->format('Y-m-d H:i:s.u');
 ```
 
 ## Usage
@@ -69,41 +86,49 @@ The `Clock` class provides a synchronized time based on a reference timestamp:
 ```php
 use Hexogen\Timesync\Clock;
 
-// Create a clock with a reference timestamp (5 seconds in the future)
 $referenceTime = microtime(true) + 5.0;
 $clock = new Clock($referenceTime, 'Europe/Kyiv');
 
-// Get current time (will be ~5 seconds ahead of system time)
 $now = $clock->now();
 ```
 
-### IP Geolocation Time Sync
+### Explicit IP Lookup with `IPGeolocationClient`
 
-Synchronize time based on IP geolocation:
+Use `IPGeolocationClient` when you already know which IPv4 address you want to resolve:
 
 ```php
+use GuzzleHttp\Client;
+use Hexogen\Timesync\IPGeolocationClient;
+
+$httpClient = new Client();
+$client = new IPGeolocationClient('your-api-key', $httpClient);
+
+$clock = $client->getCurrentTime('8.8.8.8');
+echo $clock->now()->getTimezone()->getName();
+```
+
+### Automatic Server IP Detection with `SyncService`
+
+Use `SyncService` when you want the library to detect the current server IP for you:
+
+```php
+use GuzzleHttp\Client;
 use Hexogen\Timesync\IPGeolocationClient;
 use Hexogen\Timesync\IpifyIPDetector;
-use GuzzleHttp\Client;
+use Hexogen\Timesync\SyncService;
 
 $httpClient = new Client();
 $ipDetector = new IpifyIPDetector($httpClient);
+$syncClient = new IPGeolocationClient('your-api-key', $httpClient);
+$syncService = new SyncService($syncClient, $ipDetector);
 
-$client = new IPGeolocationClient(
-    'your-api-key',
-    $httpClient,
-    $ipDetector
-);
+$clock = $syncService->getCurrentTime();
+```
 
-// Sync with specific IP
-$clock = $client->getCurrentTime('37.17.245.123');
+You can still override the detected IP explicitly:
 
-// Or let it detect the current server IP
-$clock = $client->getCurrentTime(null);
-
-// Use the synchronized clock
-$now = $clock->now();
-echo $now->getTimezone()->getName(); // Europe/Kyiv
+```php
+$clock = $syncService->getCurrentTime('37.17.245.123');
 ```
 
 ### Custom IP Detection
@@ -117,7 +142,6 @@ class CustomIPDetector implements ServerIPDetectorInterface
 {
     public function getCurrentServerIP(): string
     {
-        // Your custom logic here
         return $this->someService->fetchServerIP();
     }
 }
@@ -145,8 +169,20 @@ Implements `SyncClientInterface`
 ```php
 public function __construct(
     string $apiKey,
-    ClientInterface $httpClient,
-    ServerIPDetectorInterface $ipDetector
+    ClientInterface $httpClient
+)
+
+public function getCurrentTime(string $ip): ClockInterface
+```
+
+### `SyncService`
+
+Implements `SyncServiceInterface`
+
+```php
+public function __construct(
+    SyncClientInterface $syncClient,
+    ServerIPDetectorInterface $serverIPDetector
 )
 
 public function getCurrentTime(?string $ip = null): ClockInterface
@@ -164,11 +200,11 @@ public function getCurrentServerIP(): string
 
 ## Configuration
 
-### Get IPGeolocation API Key
+### Get an ipgeolocation.io API Key
 
 1. Sign up at [ipgeolocation.io](https://ipgeolocation.io)
-2. Get your free API key from the dashboard
-3. Use it in the `IPGeolocationClient` constructor
+2. Get your API key from the dashboard
+3. Pass it to `IPGeolocationClient`
 
 ### Time Zones
 
@@ -210,31 +246,35 @@ This library follows:
 - **PER-CS** (PHP Evolving Recommendations for Code Style)
 - **PSR-12** Extended Coding Style Guide
 - **Strict types** declaration in all files
-- **100% type coverage** with proper type hints
+- **Strong typing** with explicit interfaces and return types
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────┐
-│   IPGeolocationClient               │
-│   (SyncClientInterface)             │
+│   SyncService                       │
+│   (SyncServiceInterface)            │
 └───────────┬─────────────────────────┘
             │
             ├──► IpifyIPDetector
             │    (ServerIPDetectorInterface)
+            |     └──► PSR-18 HTTP Client
             │
-            ├──► PSR-18 HTTP Client
-            │
-            └──► Clock (PSR-20)
-                 └──► DateTimeImmutable
+            └──► IPGeolocationClient
+                 (SyncClientInterface)
+                      │
+                      ├──► PSR-18 HTTP Client
+                      │
+                      └──► Clock (PSR-20)
+                           └──► DateTimeImmutable
 ```
 
 ## How It Works
 
-1. **IP Detection**: The `IpifyIPDetector` fetches the current server's public IP address
-2. **Geolocation**: The `IPGeolocationClient` queries the ipgeolocation.io API with the IP
-3. **Time Extraction**: The API returns the current time for that IP's location
-4. **Clock Creation**: A `Clock` instance is created with the time delta and timezone
+1. **Optional IP Detection**: `SyncService` fetches the current server IP when you do not provide one
+2. **Geolocation**: `IPGeolocationClient` queries the ipgeolocation.io API with an IPv4 address
+3. **Time Extraction**: The API returns the current time and timezone for that IP's location
+4. **Clock Creation**: A `Clock` instance stores the time delta and timezone
 5. **Synchronized Time**: The clock provides synchronized time adjusted for the delta
 
 ## Error Handling
@@ -243,12 +283,12 @@ The library throws specific exceptions for different scenarios:
 
 ```php
 try {
-    $clock = $client->getCurrentTime('invalid-ip');
+    $clock = $syncService->getCurrentTime();
 } catch (\InvalidArgumentException $e) {
-    // Invalid IP address format
+    // Invalid IPv4 address format
     echo $e->getMessage();
 } catch (\RuntimeException $e) {
-    // API error or network issue
+    // API error, malformed response, or detector failure
     echo $e->getMessage();
 } catch (ClientExceptionInterface $e) {
     // HTTP client error
@@ -258,9 +298,9 @@ try {
 
 ## Performance
 
-- **Delta calculation**: Only calculates time offset once per clock instance
+- **Delta calculation**: The clock calculates the time offset once per instance
 - **Lightweight**: Minimal overhead, no background processes
-- **Caching**: Use dependency injection to cache clock instances
+- **Composable**: Cache `Clock` or `SyncService` results in your DI container if needed
 
 ## Examples
 
@@ -268,16 +308,16 @@ try {
 
 ```php
 // In a service provider
-$this->app->singleton(ClockInterface::class, function ($app) {
+$this->app->singleton(ClockInterface::class, function () {
     $httpClient = new \GuzzleHttp\Client();
     $ipDetector = new IpifyIPDetector($httpClient);
-    $client = new IPGeolocationClient(
+    $syncClient = new IPGeolocationClient(
         config('services.ipgeolocation.key'),
         $httpClient,
-        $ipDetector
     );
-    
-    return $client->getCurrentTime();
+    $syncService = new SyncService($syncClient, $ipDetector);
+
+    return $syncService->getCurrentTime();
 });
 ```
 
@@ -289,17 +329,21 @@ services:
     Hexogen\Timesync\IpifyIPDetector:
         arguments:
             - '@Psr\Http\Client\ClientInterface'
-    
+
     Hexogen\Timesync\IPGeolocationClient:
         arguments:
             - '%env(IPGEOLOCATION_API_KEY)%'
             - '@Psr\Http\Client\ClientInterface'
+
+    Hexogen\Timesync\SyncService:
+        arguments:
+            - '@Hexogen\Timesync\IPGeolocationClient'
             - '@Hexogen\Timesync\IpifyIPDetector'
 ```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Feel free to submit a Pull Request.
 
 ### Development Setup
 
@@ -323,15 +367,23 @@ composer fix
 
 ## License
 
-This library is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
+This library is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Credits
 
 - Developed by [Hexogen](https://github.com/hexogen)
-- Uses [ipgeolocation.io](https://ipgeolocation.io) API for time synchronization
-- Uses [ipify.org](https://www.ipify.org) API for IP detection
+- Uses [ipgeolocation.io](https://ipgeolocation.io) for time synchronization
+- Uses [ipify.org](https://www.ipify.org) for server IP detection
 
 ## Changelog
+
+### 0.2.0 (2026-03-11)
+
+- **Breaking**: moved optional server IP detection from `IPGeolocationClient` to `SyncService`
+- **Breaking**: `IPGeolocationClient::__construct()` now accepts only `apiKey` and `httpClient`
+- **Breaking**: `IPGeolocationClient::getCurrentTime()` now requires an explicit IPv4 string
+- Updated documentation and examples to reflect the new API split
+- Corrected the documented PHP requirement to `8.3+`
 
 ### 0.1.1 (2026-03-10)
 

@@ -16,18 +16,13 @@ class IPGeolocationClient implements SyncClientInterface
     public function __construct(
         private readonly string $apiKey,
         private readonly ClientInterface $httpClient,
-        private readonly ServerIPDetectorInterface $ipDetector,
     ) {}
 
     /**
      * @throws ClientExceptionInterface
      */
-    public function getCurrentTime(?string $ip = null): ClockInterface
+    public function getCurrentTime(string $ip): ClockInterface
     {
-        if (null === $ip) {
-            $ip = $this->ipDetector->getCurrentServerIP();
-        }
-
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
             throw new \InvalidArgumentException(sprintf(
                 'The provided IP address "%s" is not a valid IPv4 address.',
