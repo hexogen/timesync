@@ -3,7 +3,7 @@
 [![Package Version](https://img.shields.io/packagist/v/hexogen/timesync.svg)](https://packagist.org/packages/hexogen/timesync)
 [![Tests](https://github.com/hexogen/timesync/workflows/tests/badge.svg)](https://github.com/hexogen/timesync/actions)
 [![Code Coverage](https://codecov.io/gh/hexogen/timesync/branch/main/graph/badge.svg)](https://codecov.io/gh/hexogen/timesync)
-[![PHP Version](https://img.shields.io/badge/php-8.4%2B-blue.svg)](https://www.php.net/releases/8.4/)
+[![PHP Version](https://img.shields.io/badge/php-8.3%2B-blue.svg)](https://www.php.net/releases/8.3/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A simple and elegant time synchronization library for PHP that allows you to synchronize your application's clock with a remote time source based on IP geolocation.
@@ -31,29 +31,53 @@ composer require hexogen/timesync
 - PHP 8.4 or higher
 - A PSR-18 compatible HTTP client (for example Guzzle or Symfony HttpClient)
 
-## Upgrade Guide for 0.2.0
+## Upgrade Guide for 0.3.0
 
-Version `0.2.0` contains a breaking API change:
+Version `0.3.0` contains a breaking API change:
 
-- `IPGeolocationClient` is now a low-level client for explicit IPv4 lookups only
-- `IPGeolocationClient::__construct()` no longer accepts a `ServerIPDetectorInterface`
-- `IPGeolocationClient::getCurrentTime()` now requires `string $ip`
-- Automatic server IP detection moved to `SyncService`
+- `IPGeolocationClient`, `SyncService`, and `IpifyIPDetector` now expose dedicated exception classes as part of the public contract
+- Catch `InvalidIpAddressException`, `GeolocationServiceException`, and `ServerIpDetectionException` for precise failure handling
+- All library-specific exceptions now implement `TimesyncException`, so you can catch a single domain-level type when preferred
+- `0.2.x` already introduced the `SyncService` split for automatic server IP detection; that API remains the current usage model
 
-### Before (`0.1.x`)
-
-```php
-$client = new IPGeolocationClient($apiKey, $httpClient, $ipDetector);
-$clock = $client->getCurrentTime();
-```
-
-### After (`0.2.0`)
+### Before (`0.2.x`)
 
 ```php
-$syncClient = new IPGeolocationClient($apiKey, $httpClient);
-$syncService = new SyncService($syncClient, $ipDetector);
-$clock = $syncService->getCurrentTime();
+use Psr\Http\Client\ClientExceptionInterface;
+
+try {
+    $clock = $syncService->getCurrentTime();
+} catch (\InvalidArgumentException $e) {
+    // Invalid IPv4 address format
+} catch (\RuntimeException $e) {
+    // API error, malformed response, or detector failure
+} catch (ClientExceptionInterface $e) {
+    // HTTP client error
+}
 ```
+
+### After (`0.3.0`)
+
+```php
+use Hexogen\Timesync\GeolocationServiceException;
+use Hexogen\Timesync\InvalidIpAddressException;
+use Hexogen\Timesync\ServerIpDetectionException;
+use Psr\Http\Client\ClientExceptionInterface;
+
+try {
+    $clock = $syncService->getCurrentTime();
+} catch (InvalidIpAddressException $e) {
+    // Invalid IPv4 address format
+} catch (GeolocationServiceException $e) {
+    // ipgeolocation.io returned an error or malformed payload
+} catch (ServerIpDetectionException $e) {
+    // The current server IP could not be determined
+} catch (ClientExceptionInterface $e) {
+    // HTTP client transport error
+}
+```
+
+You can also catch `Hexogen\Timesync\TimesyncException` to handle all library-specific failures with one catch block.
 
 ## Quick Start
 
@@ -175,6 +199,8 @@ public function __construct(
 public function getCurrentTime(string $ip): ClockInterface
 ```
 
+Throws `InvalidIpAddressException`, `GeolocationServiceException`, and `ClientExceptionInterface`.
+
 ### `SyncService`
 
 Implements `SyncServiceInterface`
@@ -188,6 +214,8 @@ public function __construct(
 public function getCurrentTime(?string $ip = null): ClockInterface
 ```
 
+Throws `InvalidIpAddressException`, `GeolocationServiceException`, `ServerIpDetectionException`, and `ClientExceptionInterface`.
+
 ### `IpifyIPDetector`
 
 Implements `ServerIPDetectorInterface`
@@ -197,6 +225,15 @@ public function __construct(ClientInterface $httpClient)
 
 public function getCurrentServerIP(): string
 ```
+
+Throws `ServerIpDetectionException` and `ClientExceptionInterface`.
+
+### Exception Types
+
+- `TimesyncException` — marker interface implemented by all library-specific exceptions
+- `InvalidIpAddressException` — invalid IPv4 input passed to the library
+- `GeolocationServiceException` — geolocation API returned an error or malformed payload
+- `ServerIpDetectionException` — public server IP lookup failed or returned an invalid payload
 
 ## Configuration
 
@@ -279,19 +316,31 @@ This library follows:
 
 ## Error Handling
 
-The library throws specific exceptions for different scenarios:
+All library-specific exceptions implement `Hexogen\Timesync\TimesyncException`.
 
 ```php
+use Hexogen\Timesync\GeolocationServiceException;
+use Hexogen\Timesync\InvalidIpAddressException;
+use Hexogen\Timesync\ServerIpDetectionException;
+use Hexogen\Timesync\TimesyncException;
+use Psr\Http\Client\ClientExceptionInterface;
+
 try {
     $clock = $syncService->getCurrentTime();
-} catch (\InvalidArgumentException $e) {
-    // Invalid IPv4 address format
+} catch (InvalidIpAddressException $e) {
+    // Invalid IPv4 address format supplied to the library
     echo $e->getMessage();
-} catch (\RuntimeException $e) {
-    // API error, malformed response, or detector failure
+} catch (GeolocationServiceException $e) {
+    // ipgeolocation.io returned an error or unexpected payload
+    echo $e->getMessage();
+} catch (ServerIpDetectionException $e) {
+    // The current server IP could not be determined
     echo $e->getMessage();
 } catch (ClientExceptionInterface $e) {
-    // HTTP client error
+    // HTTP client transport error
+    echo $e->getMessage();
+} catch (TimesyncException $e) {
+    // Optional single catch for any other library-specific exception type
     echo $e->getMessage();
 }
 ```
@@ -376,6 +425,13 @@ This library is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 - Uses [ipify.org](https://www.ipify.org) for server IP detection
 
 ## Changelog
+
+### 0.3.0 (2026-03-11)
+
+- **Breaking**: introduced dedicated domain exceptions as part of the public API: `InvalidIpAddressException`, `GeolocationServiceException`, and `ServerIpDetectionException`
+- **Breaking**: added `TimesyncException` as a marker interface for all library-specific exceptions
+- Updated interface contracts and README examples to document the new exception handling model
+- Corrected the README PHP requirement to match `composer.json` (`PHP 8.3+`)
 
 ### 0.2.0 (2026-03-11)
 

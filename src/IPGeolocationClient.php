@@ -6,7 +6,6 @@ namespace Hexogen\Timesync;
 
 use Nyholm\Psr7\Request;
 use Psr\Clock\ClockInterface;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 
 class IPGeolocationClient implements SyncClientInterface
@@ -18,13 +17,10 @@ class IPGeolocationClient implements SyncClientInterface
         private readonly ClientInterface $httpClient,
     ) {}
 
-    /**
-     * @throws ClientExceptionInterface
-     */
     public function getCurrentTime(string $ip): ClockInterface
     {
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidIpAddressException(sprintf(
                 'The provided IP address "%s" is not a valid IPv4 address.',
                 $ip,
             ));
@@ -40,7 +36,7 @@ class IPGeolocationClient implements SyncClientInterface
         );
 
         if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException(
+            throw new GeolocationServiceException(
                 sprintf(
                     'Failed to retrieve geolocation data for IP "%s". HTTP status code: %d',
                     $ip,
@@ -52,7 +48,7 @@ class IPGeolocationClient implements SyncClientInterface
         $data = json_decode($response->getBody()->getContents(), true);
 
         if (!isset($data['time_zone']['current_time_unix'])) {
-            throw new \RuntimeException(
+            throw new GeolocationServiceException(
                 sprintf('The response from the geolocation service does not contain the expected '
                     . '"current_time_unix" field for IP "%s".', $ip),
             );

@@ -20,7 +20,7 @@ class IpifyIPDetector implements ServerIPDetectorInterface
         );
 
         if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException(
+            throw new ServerIpDetectionException(
                 sprintf(
                     'Failed to retrieve server IP address. HTTP status code: %d',
                     $response->getStatusCode(),
@@ -31,7 +31,7 @@ class IpifyIPDetector implements ServerIPDetectorInterface
         $data = json_decode($response->getBody()->getContents(), true);
 
         if (!isset($data['ip'])) {
-            throw new \RuntimeException(
+            throw new ServerIpDetectionException(
                 'The response from the IP service does not contain the expected "ip" field.',
             );
         }

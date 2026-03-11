@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hexogen\Timesync\Tests;
 
 use Hexogen\Timesync\IpifyIPDetector;
+use Hexogen\Timesync\ServerIpDetectionException;
 use Hexogen\Timesync\ServerIPDetectorInterface;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
@@ -60,7 +61,7 @@ class IpifyIPDetectorTest extends TestCase
         $detector = new IpifyIPDetector($httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ServerIpDetectionException::class);
         $this->expectExceptionMessage('Failed to retrieve server IP address. HTTP status code: 500');
 
         // Act
@@ -78,7 +79,7 @@ class IpifyIPDetectorTest extends TestCase
         $detector = new IpifyIPDetector($httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ServerIpDetectionException::class);
         $this->expectExceptionMessage('The response from the IP service does not contain the expected "ip" field.');
 
         // Act
@@ -96,7 +97,7 @@ class IpifyIPDetectorTest extends TestCase
         $detector = new IpifyIPDetector($httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ServerIpDetectionException::class);
         $this->expectExceptionMessage('The response from the IP service does not contain the expected "ip" field.');
 
         // Act

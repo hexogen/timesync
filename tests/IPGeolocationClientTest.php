@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Hexogen\Timesync\Tests;
 
 use Hexogen\Timesync\Clock;
+use Hexogen\Timesync\GeolocationServiceException;
+use Hexogen\Timesync\InvalidIpAddressException;
 use Hexogen\Timesync\IPGeolocationClient;
 use Hexogen\Timesync\ServerIPDetectorInterface;
 use Hexogen\Timesync\SyncClientInterface;
@@ -89,7 +91,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidIpAddressException::class);
         $this->expectExceptionMessage('The provided IP address "invalid-ip" is not a valid IPv4 address.');
 
         // Act
@@ -105,7 +107,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidIpAddressException::class);
         $this->expectExceptionMessage('The provided IP address "" is not a valid IPv4 address.');
 
         // Act
@@ -124,7 +126,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidIpAddressException::class);
         $this->expectExceptionMessage('The provided IP address "999.999.999.999" is not a valid IPv4 address.');
 
         // Act
@@ -140,7 +142,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidIpAddressException::class);
         $this->expectExceptionMessage('The provided IP address "2001:0db8:85a3:0000:0000:8a2e:0370:7334" is not a valid IPv4 address.');
 
         // Act
@@ -178,7 +180,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeolocationServiceException::class);
         $this->expectExceptionMessage('Failed to retrieve geolocation data for IP "37.17.245.123". HTTP status code: 500');
 
         // Act
@@ -204,7 +206,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeolocationServiceException::class);
         $this->expectExceptionMessage('The response from the geolocation service does not contain the expected "current_time_unix" field for IP "37.17.245.123".');
 
         // Act
@@ -290,7 +292,7 @@ class IPGeolocationClientTest extends TestCase
         $client = $this->createClient(self::API_KEY, $httpClient);
 
         // Assert
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(GeolocationServiceException::class);
         $this->expectExceptionMessage('The response from the geolocation service does not contain the expected "current_time_unix" field');
 
         // Act
