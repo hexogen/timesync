@@ -383,7 +383,6 @@ This library is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 - **Breaking**: `IPGeolocationClient::__construct()` now accepts only `apiKey` and `httpClient`
 - **Breaking**: `IPGeolocationClient::getCurrentTime()` now requires an explicit IPv4 string
 - Updated documentation and examples to reflect the new API split
-- Corrected the documented PHP requirement to `8.3+`
 
 ### 0.1.1 (2026-03-10)
 
